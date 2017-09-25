@@ -56,7 +56,7 @@ algo_dict = {       #TODO: setup algos here!
             'RV1': {
                 EXEC: os.path.join(MADMOM_BIN, 'DrumTranscriptor'),
                 PYPATH: MADMOM_PATH,
-                EXEC_PAT: '%s single "%s" -o "%s"',
+                EXEC_PAT: '%s single "%s" -o "%s"',   # first parameter is the executable (EXEC), second one is the input file (wav), third the output file (detection.txt)
                 BATCH: False,
                 },
             'RV2': {
@@ -74,19 +74,19 @@ algo_dict = {       #TODO: setup algos here!
             # 'CS1': {
             #     EXEC: 'ADTLib',
             #     PYPATH: MADMOM_PATH,
-            #     EXEC_PAT: '%s single "%s" -o "%s"',
+            #     EXEC_PAT: '%s -i "%s" -o "%s"',
             #     BATCH: False,
             # },
             # 'CS2': {
             #     EXEC: 'ADTLib',
             #     PYPATH: MADMOM_PATH,
-            #     EXEC_PAT: '%s single "%s" -o "%s"',
+            #     EXEC_PAT: '%s -i "%s" -o "%s"',
             #     BATCH: False,
             # },
             # 'CS3': {
             #     EXEC: 'ADTLib',
             #     PYPATH: MADMOM_PATH,
-            #     EXEC_PAT: '%s single "%s" -o "%s"',
+            #     EXEC_PAT: '%s -i "%s" -o "%s"',
             #     BATCH: False,
             # },
             }
@@ -172,6 +172,7 @@ for algo_key in algo_dict:
         # ====
         # Create Detections
         # ====
+        print('create detections for: '+algo_key+' for '+dataset_path)
 
         # collect input files
         files = [a_file for a_file in os.listdir(audio_path) if a_file.endswith('.flac') or
@@ -195,16 +196,21 @@ for algo_key in algo_dict:
                 in_file = os.path.join(audio_path, cur_file)
                 out_file = os.path.join(detection_path, os.path.splitext(cur_file)[0]+'.txt')
 
-                if os.path.exists(out_file):
+                if os.path.exists(out_file):    # don't calculate detection again if it exists!
                     continue
 
                 print('processing: ' + in_file + ' --> ' + out_file)
 
-                command = algo[EXEC_PAT] % (algo[EXEC], in_file, out_file)
+                command = algo[EXEC_PAT] % (algo[EXEC], in_file, out_file)  # run detections
                 os.system(command)
 
         # reset environment
         os.environ['PYTHONPATH'] = save_pypath
+
+        # ====
+        # Run Evaluation
+        # ====
+        print('run evaluation for: ' + algo_key + ' for ' + dataset_path)
 
         set_eval = []                                   # evals for single tracks
         set_inst_eval = [[] for _ in range(NUM_INST)]   # evals for single instruments on single tracks
@@ -224,7 +230,8 @@ for algo_key in algo_dict:
 
             file_inst_eval = [[] for _ in range(NUM_INST)]
             for inst in range(NUM_INST):
-                file_inst_eval[inst] = OnsetEvaluation(detections=filter_inst(detections, inst), annotations=filter_inst(annotations, inst))
+                file_inst_eval[inst] = OnsetEvaluation(detections=filter_inst(detections, inst),
+                                                       annotations=filter_inst(annotations, inst), window=tolerance)
                 set_inst_eval[inst].append(file_inst_eval[inst])
                 global_inst_eval[inst].append(file_inst_eval[inst])
 
