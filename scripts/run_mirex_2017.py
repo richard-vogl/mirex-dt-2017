@@ -5,6 +5,8 @@ import pickle
 from madmom.evaluation.notes import NoteEvaluation, NoteSumEvaluation, NoteMeanEvaluation
 from madmom.evaluation.onsets import OnsetEvaluation, OnsetSumEvaluation, OnsetMeanEvaluation
 
+from config import MADMOM_PATH, experiment_base_path
+
 """
 folder layout:
 
@@ -40,9 +42,6 @@ mirex-dt-2017
 """
 
 # ==== setup ====
-tolerance = 0.030  # seconds
-MADMOM_PATH = '/Users/Rich/python-workspace/madmom_dev'  #TODO: point this to your madmom path for RV algos
-experiment_base_path = '/Users/Rich/Desktop/mirex-dt-2017'  #TODO: point this to the DT dataset eval base folder
 RUN_ON_PUBLIC = True
 
 MADMOM_BIN = os.path.join(MADMOM_PATH, 'bin')
@@ -51,6 +50,8 @@ EXEC = 'executable'
 PYPATH = 'path'
 EXEC_PAT = 'execution_pattern'
 BATCH = 'batch'
+
+tolerance = 0.030  # seconds
 
 algo_dict = {       #TODO: setup algos here!
             'RV1': {
