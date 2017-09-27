@@ -43,7 +43,7 @@ mirex-dt-2017
 tolerance = 0.030  # seconds
 MADMOM_PATH = '/Users/Rich/python-workspace/madmom_dev'  #TODO: point this to your madmom path for RV algos
 experiment_base_path = '/Users/Rich/Desktop/mirex-dt-2017'  #TODO: point this to the DT dataset eval base folder
-RUN_ON_PUBLIC = True
+RUN_ON_PUBLIC = False
 
 MADMOM_BIN = os.path.join(MADMOM_PATH, 'bin')
 
@@ -71,6 +71,12 @@ algo_dict = {       #TODO: setup algos here!
                 EXEC_PAT: '%s -m BRNN2 single "%s" -o "%s"',
                 BATCH: False,
                 },
+            'RV4': {
+                EXEC: os.path.join(MADMOM_BIN, 'DrumTranscriptor'),
+                PYPATH: MADMOM_PATH,
+                EXEC_PAT: '%s -m ENS single "%s" -o "%s"',
+                BATCH: False,
+            },
             # 'CS1': {
             #     EXEC: 'ADTLib',
             #     PYPATH: MADMOM_PATH,
@@ -95,10 +101,10 @@ results_base = 'results'
 
 if RUN_ON_PUBLIC:
     dataset_base = 'public-set'
-    dataset_paths = ['2005', 'GEN', 'MEDLEY', 'RBMA']
+    dataset_names = ['2005', 'GEN', 'MEDLEY', 'RBMA']
 else:
     dataset_base = 'eval-set'
-    dataset_paths = ['IDMT', 'KT', 'GEN', 'RBMA', 'MEDLEY']
+    dataset_names = ['IDMT', 'KT', 'GEN', 'RBMA', 'MEDLEY']
 
 audio_path_part = 'audio'
 annotations_path_part = 'annotations'
@@ -107,6 +113,19 @@ detection_path_part = 'detections'
 evaluation_path_part = 'evaluation'
 
 NUM_INST = 3
+
+# table strings
+FM_MEAN = 'f-meas (mean)'
+FM_SUM  = 'f-meas (sum)'
+PR_MEAN = 'prec. (mean)'
+PR_SUM  = 'prec. (sum)'
+RE_MEAN = 'recall (mean)'
+RE_SUM  = 'recall (sum)'
+ALL_INST = 'all inst.'
+BD_INST = 'bass drum'
+SD_INST = 'snare drum'
+HH_INST = 'hi-hat'
+OV_SET = 'overall'
 
 
 def read_txt_annotations(txt_file, statistics=None):
@@ -138,6 +157,8 @@ def filter_inst(entries, num):
     return [entry for entry in entries if entry[1] == num]
 
 
+results_table = {}
+
 for algo_key in algo_dict:
     algo = algo_dict[algo_key]
 
@@ -150,11 +171,13 @@ for algo_key in algo_dict:
     if not os.path.exists(evaluation_global_path):
         os.makedirs(evaluation_global_path)
 
-    # run through data and make transcription
-    for dataset_path in dataset_paths:
+    results_table[algo_key] = {}
 
-        cur_ds_path = os.path.join(experiment_base_path, dataset_base, dataset_path)
-        cur_op_path = os.path.join(experiment_base_path, results_base, algo_key, dataset_base, dataset_path)
+    # run through data and make transcription
+    for dataset_name in dataset_names:
+
+        cur_ds_path = os.path.join(experiment_base_path, dataset_base, dataset_name)
+        cur_op_path = os.path.join(experiment_base_path, results_base, algo_key, dataset_base, dataset_name)
 
         audio_path = os.path.join(cur_ds_path, audio_path_part)
         detection_path = os.path.join(cur_op_path, detection_path_part)
@@ -172,7 +195,7 @@ for algo_key in algo_dict:
         # ====
         # Create Detections
         # ====
-        print('create detections for: '+algo_key+' for '+dataset_path)
+        print('create detections for: ' + algo_key +' for ' + dataset_name)
 
         # collect input files
         files = [a_file for a_file in os.listdir(audio_path) if a_file.endswith('.flac') or
@@ -210,7 +233,7 @@ for algo_key in algo_dict:
         # ====
         # Run Evaluation
         # ====
-        print('run evaluation for: ' + algo_key + ' for ' + dataset_path)
+        print('run evaluation for: ' + algo_key + ' for ' + dataset_name)
 
         set_eval = []                                   # evals for single tracks
         set_inst_eval = [[] for _ in range(NUM_INST)]   # evals for single instruments on single tracks
@@ -262,6 +285,13 @@ for algo_key in algo_dict:
             pickle.dump({'set_sum': set_sum, 'set_mean': set_mean, 'set_inst_sum': set_inst_sum,
                          'set_inst_mean': set_inst_mean, 'set_eval': set_eval, 'set_inst_eval': set_inst_eval}, f)
 
+        results_table[algo_key][dataset_name] = {
+            'set_mean': set_mean,
+            'set_sum': set_sum,
+            'inst_mean': set_inst_mean,
+            'inst_sum': set_inst_sum,
+        }
+
     global_sum = NoteSumEvaluation(global_eval)         # global all instrument sum evaluation
     global_mean = NoteMeanEvaluation(global_eval_mean)  # global all instrument mean evaluation on means of sets
 
@@ -286,3 +316,57 @@ for algo_key in algo_dict:
                      'global_inst_mean': global_inst_mean, 'global_eval': global_eval,
                      'global_eval_mean': global_eval_mean, 'global_inst_eval': global_inst_eval,
                      'global_inst_eval_mean': global_inst_eval_mean}, f)
+
+    results_table[algo_key]['global'] = {
+        'set_mean': global_mean,
+        'set_sum': global_sum,
+        'inst_mean': global_inst_mean,
+        'inst_sum': global_inst_sum,
+    }
+
+
+# ====
+# create table
+# ====
+
+tables = {}
+
+for algo_key in results_table.keys():
+    algo_results = results_table[algo_key]
+
+    for cur_set in algo_results.keys():
+        if cur_set not in tables or len(tables[cur_set]) <= 0:
+            tables[cur_set] = "Table for set '"+cur_set+"' : \n"+\
+                          "    \t | all inst                           | BD                                  | SD                                  | HH                                 |\n"+\
+                          "    \t | sum               mean             | sum               tmean             | sum               mean              | sum            mean                |\n"+\
+                          "algo\t | fm    pr    rc    fm    pr    rc   | fm    pr    rc    fm    pr    rc    | fm    pr    rc    fm    pr    rc    | fm   pr   rc   fm   pr   rc        |\n"+\
+                        "---------+------------------------------------+-------------------------------------+-------------------------------------+------------------------------------+\n"
+
+        fm = algo_results[cur_set]['set_sum'].fmeasure
+        pr = algo_results[cur_set]['set_sum'].precision
+        rc = algo_results[cur_set]['set_sum'].recall
+        fmm = algo_results[cur_set]['set_mean'].fmeasure
+        prm = algo_results[cur_set]['set_mean'].precision
+        rcm = algo_results[cur_set]['set_mean'].recall
+
+        tables[cur_set] += algo_key+" \t | %1.2f  %1.2f  %1.2f  %1.2f  %1.2f  %1.2f"%(fm, pr, rc, fmm, prm, rcm)
+
+        inst_mean = algo_results[cur_set]['inst_mean']
+        inst_sum = algo_results[cur_set]['inst_mean']
+        for inst in range(NUM_INST):
+            fm = inst_sum[inst].fmeasure
+            pr = inst_sum[inst].precision
+            rc = inst_sum[inst].recall
+            fmm = inst_mean[inst].fmeasure
+            prm = inst_mean[inst].precision
+            rcm = inst_mean[inst].recall
+            tables[cur_set] += " | %1.2f  %1.2f  %1.2f  %1.2f  %1.2f  %1.2f "%(fm, pr, rc, fmm, prm, rcm)
+
+        tables[cur_set]+="| \n"
+
+# print table to console and file
+with open(os.path.join(experiment_base_path, results_base, dataset_base+'_results_table.txt'), 'w') as f:
+    for table in tables:
+        print(tables[table] + "\n")
+        f.write(tables[table]+"\n")
+
