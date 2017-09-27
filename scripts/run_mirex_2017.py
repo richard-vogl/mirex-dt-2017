@@ -43,7 +43,7 @@ mirex-dt-2017
 tolerance = 0.030  # seconds
 MADMOM_PATH = '/Users/Rich/python-workspace/madmom_dev'  #TODO: point this to your madmom path for RV algos
 experiment_base_path = '/Users/Rich/Desktop/mirex-dt-2017'  #TODO: point this to the DT dataset eval base folder
-RUN_ON_PUBLIC = False
+RUN_ON_PUBLIC = True
 
 MADMOM_BIN = os.path.join(MADMOM_PATH, 'bin')
 
@@ -197,12 +197,13 @@ for algo_key in algo_dict:
         # ====
         print('create detections for: ' + algo_key +' for ' + dataset_name)
 
+        if not os.path.exists(audio_path) or len(os.listdir(audio_path)) <= 0:
+            print("Skipping: <"+audio_path+"> - no files found")
+            continue
+
         # collect input files
         files = [a_file for a_file in os.listdir(audio_path) if a_file.endswith('.flac') or
                                                                 a_file.endswith('.wav') or a_file.endswith('.mp3')]
-        if len(files) <= 0:
-            print("Skipping: <"+audio_path+"> - no files found")
-            continue
 
         # setup environment for algo
         save_pypath = os.environ['PYTHONPATH']
@@ -245,6 +246,8 @@ for algo_key in algo_dict:
             annotation_file = os.path.join(annotation_path, os.path.splitext(cur_file)[0] + '.txt')
 
             detections = read_txt_annotations(detection_file)
+            if not os.path.exists(annotation_file):
+                continue
             annotations = read_txt_annotations(annotation_file)
 
             file_eval = NoteEvaluation(detections=detections, annotations=annotations, window=tolerance)
