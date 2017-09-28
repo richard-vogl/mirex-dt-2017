@@ -5,7 +5,7 @@ import pickle
 from madmom.evaluation.notes import NoteEvaluation, NoteSumEvaluation, NoteMeanEvaluation
 from madmom.evaluation.onsets import OnsetEvaluation, OnsetSumEvaluation, OnsetMeanEvaluation
 
-from config import MADMOM_PATH, experiment_base_path
+from config import MADMOM_PATH, experiment_base_path, DTCS_PATH, CW_ML_PATH, MATLAB_PATH
 
 """
 folder layout:
@@ -45,11 +45,14 @@ mirex-dt-2017
 RUN_ON_PUBLIC = True
 
 MADMOM_BIN = os.path.join(MADMOM_PATH, 'bin')
+DTCS_BIN = os.path.join(DTCS_PATH, 'bin')
 
 EXEC = 'executable'
-PYPATH = 'path'
+PYPATH = 'pypath'
+MATPATH = 'matpath'
 EXEC_PAT = 'execution_pattern'
 BATCH = 'batch'
+USE_IN_PATH = 'use_in_path'
 
 tolerance = 0.030  # seconds
 
@@ -57,45 +60,86 @@ algo_dict = {       #TODO: setup algos here!
             'RV1': {
                 EXEC: os.path.join(MADMOM_BIN, 'DrumTranscriptor'),
                 PYPATH: MADMOM_PATH,
-                EXEC_PAT: '%s single "%s" -o "%s"',   # first parameter is the executable (EXEC), second one is the input file (wav), third the output file (detection.txt)
+                MATPATH: "",
+                EXEC_PAT: '%s batch %s -o "%s"',   # first parameter is the executable (EXEC), second one is the input file (wav), third the output file (detection.txt)
                 BATCH: False,
+                USE_IN_PATH: True,
                 },
             'RV2': {
                 EXEC: os.path.join(MADMOM_BIN, 'DrumTranscriptor'),
                 PYPATH: MADMOM_PATH,
-                EXEC_PAT: '%s -m CNN3 single "%s" -o "%s"',
+                MATPATH: "",
+                EXEC_PAT: '%s -m CNN3 batch %s -o "%s" -s ".txt"',
                 BATCH: False,
+                USE_IN_PATH: True,
                 },
             'RV3': {
                 EXEC: os.path.join(MADMOM_BIN, 'DrumTranscriptor'),
                 PYPATH: MADMOM_PATH,
-                EXEC_PAT: '%s -m BRNN2 single "%s" -o "%s"',
+                MATPATH: "",
+                EXEC_PAT: '%s -m BRNN2 batch %s -o "%s" -s ".txt"',
                 BATCH: False,
+                USE_IN_PATH: True,
                 },
             'RV4': {
                 EXEC: os.path.join(MADMOM_BIN, 'DrumTranscriptor'),
                 PYPATH: MADMOM_PATH,
-                EXEC_PAT: '%s -m ENS single "%s" -o "%s"',
+                MATPATH: "",
+                EXEC_PAT: '%s -m ENS batch %s -o "%s" -s ".txt"',
                 BATCH: False,
+                USE_IN_PATH: True,
             },
-            # 'CS1': {
-            #     EXEC: 'ADTLib',
-            #     PYPATH: MADMOM_PATH,
-            #     EXEC_PAT: '%s -i "%s" -o "%s"',
-            #     BATCH: False,
-            # },
-            # 'CS2': {
-            #     EXEC: 'ADTLib',
-            #     PYPATH: MADMOM_PATH,
-            #     EXEC_PAT: '%s -i "%s" -o "%s"',
-            #     BATCH: False,
-            # },
-            # 'CS3': {
-            #     EXEC: 'ADTLib',
-            #     PYPATH: MADMOM_PATH,
-            #     EXEC_PAT: '%s -i "%s" -o "%s"',
-            #     BATCH: False,
-            # },
+
+            'CS1': {
+                EXEC: os.path.join(DTCS_BIN, 'DTCS'),
+                PYPATH: DTCS_PATH,
+                MATPATH: "",
+                EXEC_PAT: '%s -s 0 %s -od "%s"',
+                BATCH: True,
+                USE_IN_PATH: True,
+            },
+            'CS2': {
+                EXEC: os.path.join(DTCS_BIN, 'DTCS'),
+                PYPATH: DTCS_PATH,
+                MATPATH: "",
+                EXEC_PAT: '%s -s 1 %s -od "%s"',
+                BATCH: True,
+                USE_IN_PATH: True,
+            },
+            'CS3': {
+                EXEC: os.path.join(DTCS_BIN, 'DTCS'),
+                PYPATH: DTCS_PATH,
+                MATPATH: "",
+                EXEC_PAT: '%s -s 2 %s -od "%s"',
+                BATCH: True,
+                USE_IN_PATH: True,
+            },
+
+            'CW1': {
+                EXEC: MATLAB_PATH + " -nojvm -nodisplay -nosplash -nodesktop -r ",
+                PYPATH: "",
+                MATPATH: os.path.join(CW_ML_PATH),
+                EXEC_PAT: "%s \"try, CW_MIREX2017_pfnmf('%s', '%s'), catch me, fprintf('%%s / %%s\\n',me.identifier,me.message), end, exit\"",
+                BATCH: True,
+                USE_IN_PATH: True,
+            },
+            'CW2': {
+                EXEC: MATLAB_PATH + " -nojvm -nodisplay -nosplash -nodesktop -r ",
+                PYPATH: "",
+                MATPATH: os.path.join(CW_ML_PATH),
+                EXEC_PAT: "%s \"try, CW_MIREX2017_am1('%s', '%s'), catch me, fprintf('%%s / %%s\\n',me.identifier,me.message), end, exit\"",
+                BATCH: True,
+                USE_IN_PATH: True,
+            },
+
+            'CW3': {
+                EXEC: MATLAB_PATH + " -nojvm -nodisplay -nosplash -nodesktop -r ",
+                PYPATH: "",
+                MATPATH: os.path.join(CW_ML_PATH),
+                EXEC_PAT: "%s \"try, CW_MIREX2017_am2('%s', '%s'), catch me, fprintf('%%s / %%s\\n',me.identifier,me.message), end, exit\"",
+                BATCH: True,
+                USE_IN_PATH: True,
+            },
             }
 
 results_base = 'results'
@@ -114,19 +158,6 @@ detection_path_part = 'detections'
 evaluation_path_part = 'evaluation'
 
 NUM_INST = 3
-
-# table strings
-FM_MEAN = 'f-meas (mean)'
-FM_SUM  = 'f-meas (sum)'
-PR_MEAN = 'prec. (mean)'
-PR_SUM  = 'prec. (sum)'
-RE_MEAN = 'recall (mean)'
-RE_SUM  = 'recall (sum)'
-ALL_INST = 'all inst.'
-BD_INST = 'bass drum'
-SD_INST = 'snare drum'
-HH_INST = 'hi-hat'
-OV_SET = 'overall'
 
 
 def read_txt_annotations(txt_file, statistics=None):
@@ -204,33 +235,48 @@ for algo_key in algo_dict:
 
         # collect input files
         files = [a_file for a_file in os.listdir(audio_path) if a_file.endswith('.flac') or
-                                                                a_file.endswith('.wav') or a_file.endswith('.mp3')]
+                                                                a_file.endswith('.wav') or
+                                                                a_file.endswith('.mp3')]
 
         # setup environment for algo
         save_pypath = os.environ['PYTHONPATH']
+        if 'MATLABPATH' in os.environ:
+            save_matpath = os.environ['MATLABPATH']
+        else:
+            save_matpath = ""
         os.environ['PYTHONPATH'] = algo[PYPATH]
+        os.environ['MATLABPATH'] = algo[MATPATH]
+
+        file_list = []
+        for cur_file in files:
+            out_file = os.path.join(detection_path, os.path.splitext(cur_file)[0] + '.txt')
+            if not os.path.exists(out_file):
+                file_list.append(cur_file)
 
         # either batch process files or iterate over input files
         if algo[BATCH]:
-            print('batch processing: ' + audio_path + ' --> ' + detection_path)
-            file_list = ' '.join([os.path.join(audio_path, cur_file) for cur_file in files])
-            command = algo[EXEC_PAT] % (algo[EXEC], file_list, detection_path)
-            os.system(command)
+            file_list_str = ' '.join(['"' + os.path.join(audio_path, cur_file) + '"' for cur_file in file_list])
+
+            if len(file_list) > 0:   # don't calculate detection again if it exists!
+                print('batch processing: ' + audio_path + ' --> ' + detection_path)
+                if algo[USE_IN_PATH]:
+                    command = algo[EXEC_PAT] % (algo[EXEC], audio_path, detection_path)
+                else:
+                    command = algo[EXEC_PAT] % (algo[EXEC], file_list, detection_path)
+                os.system(command)
         else:
-            for cur_file in files:
+            for cur_file in file_list:
                 in_file = os.path.join(audio_path, cur_file)
                 out_file = os.path.join(detection_path, os.path.splitext(cur_file)[0]+'.txt')
 
-                if os.path.exists(out_file):    # don't calculate detection again if it exists!
-                    continue
-
                 print('processing: ' + in_file + ' --> ' + out_file)
-
                 command = algo[EXEC_PAT] % (algo[EXEC], in_file, out_file)  # run detections
                 os.system(command)
 
         # reset environment
         os.environ['PYTHONPATH'] = save_pypath
+        os.environ['MATLABPATH'] = save_matpath
+
 
         # ====
         # Run Evaluation
