@@ -52,18 +52,16 @@ PYPATH = 'pypath'
 MATPATH = 'matpath'
 EXEC_PAT = 'execution_pattern'
 BATCH = 'batch'
-USE_IN_PATH = 'use_in_path'
 
 tolerance = 0.030  # seconds
 
-algo_dict = {       #TODO: setup algos here!
+algo_dict = {
             'RV1': {
                 EXEC: os.path.join(MADMOM_BIN, 'DrumTranscriptor'),
                 PYPATH: MADMOM_PATH,
                 MATPATH: "",
                 EXEC_PAT: '%s batch %s -o "%s"',   # first parameter is the executable (EXEC), second one is the input file (wav), third the output file (detection.txt)
                 BATCH: False,
-                USE_IN_PATH: True,
                 },
             'RV2': {
                 EXEC: os.path.join(MADMOM_BIN, 'DrumTranscriptor'),
@@ -71,7 +69,6 @@ algo_dict = {       #TODO: setup algos here!
                 MATPATH: "",
                 EXEC_PAT: '%s -m CNN3 batch %s -o "%s" -s ".txt"',
                 BATCH: False,
-                USE_IN_PATH: True,
                 },
             'RV3': {
                 EXEC: os.path.join(MADMOM_BIN, 'DrumTranscriptor'),
@@ -79,7 +76,6 @@ algo_dict = {       #TODO: setup algos here!
                 MATPATH: "",
                 EXEC_PAT: '%s -m BRNN2 batch %s -o "%s" -s ".txt"',
                 BATCH: False,
-                USE_IN_PATH: True,
                 },
             'RV4': {
                 EXEC: os.path.join(MADMOM_BIN, 'DrumTranscriptor'),
@@ -87,7 +83,6 @@ algo_dict = {       #TODO: setup algos here!
                 MATPATH: "",
                 EXEC_PAT: '%s -m ENS batch %s -o "%s" -s ".txt"',
                 BATCH: False,
-                USE_IN_PATH: True,
             },
 
             'CS1': {
@@ -96,7 +91,6 @@ algo_dict = {       #TODO: setup algos here!
                 MATPATH: "",
                 EXEC_PAT: '%s -s 0 %s -od "%s"',
                 BATCH: True,
-                USE_IN_PATH: True,
             },
             'CS2': {
                 EXEC: os.path.join(DTCS_BIN, 'DTCS'),
@@ -104,7 +98,6 @@ algo_dict = {       #TODO: setup algos here!
                 MATPATH: "",
                 EXEC_PAT: '%s -s 1 %s -od "%s"',
                 BATCH: True,
-                USE_IN_PATH: True,
             },
             'CS3': {
                 EXEC: os.path.join(DTCS_BIN, 'DTCS'),
@@ -112,35 +105,34 @@ algo_dict = {       #TODO: setup algos here!
                 MATPATH: "",
                 EXEC_PAT: '%s -s 2 %s -od "%s"',
                 BATCH: True,
-                USE_IN_PATH: True,
             },
 
             'CW1': {
                 EXEC: MATLAB_PATH + " -nojvm -nodisplay -nosplash -nodesktop -r ",
                 PYPATH: "",
                 MATPATH: os.path.join(CW_ML_PATH),
-                EXEC_PAT: "%s \"try, CW_MIREX2017_pfnmf('%s', '%s'), catch me, fprintf('%%s / %%s\\n',me.identifier,me.message), end, exit\"",
+                EXEC_PAT: "%s \"try, dt_cw({%s}, '%s', 'PfNmf'), catch me, fprintf('%%s / %%s\\n',me.identifier,me.message), end, exit\"",
+                # 'PfNmf'
                 BATCH: True,
-                USE_IN_PATH: True,
             },
             'CW2': {
                 EXEC: MATLAB_PATH + " -nojvm -nodisplay -nosplash -nodesktop -r ",
                 PYPATH: "",
                 MATPATH: os.path.join(CW_ML_PATH),
-                EXEC_PAT: "%s \"try, CW_MIREX2017_am1('%s', '%s'), catch me, fprintf('%%s / %%s\\n',me.identifier,me.message), end, exit\"",
+                EXEC_PAT: "%s \"try, dt_cw({%s}, '%s', 'Am1'), catch me, fprintf('%%s / %%s\\n',me.identifier,me.message), end, exit\"",
+                # 'Am1'
                 BATCH: True,
-                USE_IN_PATH: True,
             },
 
             'CW3': {
                 EXEC: MATLAB_PATH + " -nojvm -nodisplay -nosplash -nodesktop -r ",
                 PYPATH: "",
                 MATPATH: os.path.join(CW_ML_PATH),
-                EXEC_PAT: "%s \"try, CW_MIREX2017_am2('%s', '%s'), catch me, fprintf('%%s / %%s\\n',me.identifier,me.message), end, exit\"",
+                EXEC_PAT: "%s \"try, dt_cw({%s}, '%s', 'Am2'), catch me, fprintf('%%s / %%s\\n',me.identifier,me.message), end, exit\"",
+                # 'Am2'
                 BATCH: True,
-                USE_IN_PATH: True,
             },
-            }
+        }
 
 results_base = 'results'
 
@@ -239,7 +231,10 @@ for algo_key in algo_dict:
                                                                 a_file.endswith('.mp3')]
 
         # setup environment for algo
-        save_pypath = os.environ['PYTHONPATH']
+        if 'PYTHONPATH' in os.environ:
+            save_pypath = os.environ['PYTHONPATH']
+        else:
+            save_pypath = ""
         if 'MATLABPATH' in os.environ:
             save_matpath = os.environ['MATLABPATH']
         else:
@@ -250,19 +245,16 @@ for algo_key in algo_dict:
         file_list = []
         for cur_file in files:
             out_file = os.path.join(detection_path, os.path.splitext(cur_file)[0] + '.txt')
-            if not os.path.exists(out_file):
+            if not os.path.exists(out_file): # don't calculate detection again if it exists!
                 file_list.append(cur_file)
 
         # either batch process files or iterate over input files
         if algo[BATCH]:
-            file_list_str = ' '.join(['"' + os.path.join(audio_path, cur_file) + '"' for cur_file in file_list])
+            file_list_str = ' '.join(['\'' + os.path.join(audio_path, cur_file) + '\'' for cur_file in file_list])
 
-            if len(file_list) > 0:   # don't calculate detection again if it exists!
+            if len(file_list) > 0:
                 print('batch processing: ' + audio_path + ' --> ' + detection_path)
-                if algo[USE_IN_PATH]:
-                    command = algo[EXEC_PAT] % (algo[EXEC], audio_path, detection_path)
-                else:
-                    command = algo[EXEC_PAT] % (algo[EXEC], file_list, detection_path)
+                command = algo[EXEC_PAT] % (algo[EXEC], file_list, detection_path)
                 os.system(command)
         else:
             for cur_file in file_list:
