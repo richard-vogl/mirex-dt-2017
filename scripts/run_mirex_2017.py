@@ -61,28 +61,28 @@ algo_dict = {
                 PYPATH: MADMOM_PATH,
                 MATPATH: "",
                 EXEC_PAT: '%s batch %s -o "%s"',   # first parameter is the executable (EXEC), second one is the input file (wav), third the output file (detection.txt)
-                BATCH: False,
+                BATCH: True,
                 },
             'RV2': {
                 EXEC: os.path.join(MADMOM_BIN, 'DrumTranscriptor'),
                 PYPATH: MADMOM_PATH,
                 MATPATH: "",
                 EXEC_PAT: '%s -m CNN3 batch %s -o "%s" -s ".txt"',
-                BATCH: False,
+                BATCH: True,
                 },
             'RV3': {
                 EXEC: os.path.join(MADMOM_BIN, 'DrumTranscriptor'),
                 PYPATH: MADMOM_PATH,
                 MATPATH: "",
                 EXEC_PAT: '%s -m BRNN2 batch %s -o "%s" -s ".txt"',
-                BATCH: False,
+                BATCH: True,
                 },
             'RV4': {
                 EXEC: os.path.join(MADMOM_BIN, 'DrumTranscriptor'),
                 PYPATH: MADMOM_PATH,
                 MATPATH: "",
                 EXEC_PAT: '%s -m ENS batch %s -o "%s" -s ".txt"',
-                BATCH: False,
+                BATCH: True,
             },
 
             'CS1': {
@@ -254,7 +254,7 @@ for algo_key in algo_dict:
 
             if len(file_list) > 0:
                 print('batch processing: ' + audio_path + ' --> ' + detection_path)
-                command = algo[EXEC_PAT] % (algo[EXEC], file_list, detection_path)
+                command = algo[EXEC_PAT] % (algo[EXEC], file_list_str, detection_path)
                 os.system(command)
         else:
             for cur_file in file_list:
