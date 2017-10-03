@@ -60,7 +60,7 @@ algo_dict = {
                 EXEC: os.path.join(MADMOM_BIN, 'DrumTranscriptor'),
                 PYPATH: MADMOM_PATH,
                 MATPATH: "",
-                EXEC_PAT: '%s batch %s -o "%s"',   # first parameter is the executable (EXEC), second one is the input file (wav), third the output file (detection.txt)
+                EXEC_PAT: '%s batch %s -o "%s" -s ".txt"',   # first parameter is the executable (EXEC), second one is the input file (wav), third the output file (detection.txt)
                 BATCH: True,
                 },
             'RV2': {
@@ -379,10 +379,10 @@ for algo_key in results_table.keys():
     for cur_set in algo_results.keys():
         if cur_set not in tables or len(tables[cur_set]) <= 0:
             tables[cur_set] = "Table for set '"+cur_set+"' : \n"+\
-                          "    \t | all inst                           | BD                                  | SD                                  | HH                                 |\n"+\
-                          "    \t | sum               mean             | sum               tmean             | sum               mean              | sum            mean                |\n"+\
+                          "    \t | ALL inst                           | BD                                  | SD                                  | HH                                 |\n"+\
+                          "    \t | sum               mean             | sum               mean              | sum               mean              | sum            mean                |\n"+\
                           "algo\t | fm    pr    rc    fm    pr    rc   | fm    pr    rc    fm    pr    rc    | fm    pr    rc    fm    pr    rc    | fm   pr   rc   fm   pr   rc        |\n"+\
-                        "---------+------------------------------------+-------------------------------------+-------------------------------------+------------------------------------+\n"
+                         "--------+------------------------------------+-------------------------------------+-------------------------------------+------------------------------------+\n"
 
         fm = algo_results[cur_set]['set_sum'].fmeasure
         pr = algo_results[cur_set]['set_sum'].precision
