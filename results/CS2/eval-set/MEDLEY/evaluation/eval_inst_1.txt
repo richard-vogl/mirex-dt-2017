@@ -1,6 +1,6 @@
 Sum Evaluation
 sum for 22 files
-  Onsets:  2598 TP:  2021 FP:  3445 FN:   577 Precision: 0.370 Recall: 0.778 F-measure: 0.501 mean:   8.8 ms std:   9.2 ms
+  Onsets:  2598 TP:  1517 FP:   567 FN:  1081 Precision: 0.728 Recall: 0.584 F-measure: 0.648 mean:   8.5 ms std:   9.0 ms
 Mean Evaluation
 mean for 22 files
-  Onsets: 118.09 TP: 91.86 FP: 156.59 FN: 26.23 Precision: 0.322 Recall: 0.833 F-measure: 0.442 mean:   7.6 ms std:   8.4 ms
+  Onsets: 118.09 TP: 68.95 FP: 25.77 FN: 49.14 Precision: 0.665 Recall: 0.689 F-measure: 0.621 mean:   8.4 ms std:   8.4 ms

@@ -1,6 +1,6 @@
 Sum Evaluation
 sum for 136 files
-  Notes: 10423 TP:  9121 FP: 14522 FN: 1302 Precision: 0.386 Recall: 0.875 F-measure: 0.535 Acc: 0.366 mean:  12.6 ms std:   5.9 ms
+  Notes: 10423 TP:  8802 FP: 4569 FN: 1621 Precision: 0.658 Recall: 0.844 F-measure: 0.740 Acc: 0.587 mean:  12.2 ms std:   5.7 ms
 Mean Evaluation
 mean for 136 files
-  Notes: 76.64 TP: 67.07 FP: 106.78 FN:  9.57 Precision: 0.365 Recall: 0.832 F-measure: 0.498 Acc: 0.342 mean:  11.7 ms std:   4.9 ms
+  Notes: 76.64 TP: 64.72 FP: 33.60 FN: 11.92 Precision: 0.595 Recall: 0.838 F-measure: 0.678 Acc: 0.540 mean:  11.7 ms std:   4.8 ms
