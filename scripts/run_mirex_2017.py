@@ -42,7 +42,7 @@ mirex-dt-2017
 """
 
 # ==== setup ====
-RUN_ON_PUBLIC = True
+RUN_ON_PUBLIC = False
 
 MADMOM_BIN = os.path.join(MADMOM_PATH, 'bin')
 DTCS_BIN = os.path.join(DTCS_PATH, 'bin')
@@ -123,7 +123,6 @@ algo_dict = {
                 # 'Am1'
                 BATCH: True,
             },
-
             'CW3': {
                 EXEC: MATLAB_PATH + " -nojvm -nodisplay -nosplash -nodesktop -r ",
                 PYPATH: "",
@@ -206,13 +205,10 @@ for algo_key in algo_dict:
         audio_path = os.path.join(cur_ds_path, audio_path_part)
         detection_path = os.path.join(cur_op_path, detection_path_part)
         annotation_path = os.path.join(cur_ds_path, annotations_path_part)
-        annotation_fixed_path = os.path.join(cur_ds_path, annotations_fixed_path_part)
         evaluation_set_path = os.path.join(cur_op_path, evaluation_path_part)
 
         if not os.path.exists(detection_path):
             os.makedirs(detection_path)
-        if not os.path.exists(annotation_fixed_path):
-            os.makedirs(annotation_fixed_path)
         if not os.path.exists(evaluation_set_path):
             os.makedirs(evaluation_set_path)
 
@@ -268,7 +264,6 @@ for algo_key in algo_dict:
         # reset environment
         os.environ['PYTHONPATH'] = save_pypath
         os.environ['MATLABPATH'] = save_matpath
-
 
         # ====
         # Run Evaluation
@@ -379,10 +374,10 @@ for algo_key in results_table.keys():
     for cur_set in algo_results.keys():
         if cur_set not in tables or len(tables[cur_set]) <= 0:
             tables[cur_set] = "Table for set '"+cur_set+"' : \n"+\
-                          "    \t | ALL inst                           | BD                                  | SD                                  | HH                                 |\n"+\
-                          "    \t | sum               mean             | sum               mean              | sum               mean              | sum            mean                |\n"+\
-                          "algo\t | fm    pr    rc    fm    pr    rc   | fm    pr    rc    fm    pr    rc    | fm    pr    rc    fm    pr    rc    | fm   pr   rc   fm   pr   rc        |\n"+\
-                         "--------+------------------------------------+-------------------------------------+-------------------------------------+------------------------------------+\n"
+                          "    \t | ALL inst                           | BD                                  | SD                                  | HH                                  |\n"+\
+                          "    \t | sum               mean             | sum               mean              | sum               mean              | sum               mean              |\n"+\
+                          "algo\t | fm    pr    rc    fm    pr    rc   | fm    pr    rc    fm    pr    rc    | fm    pr    rc    fm    pr    rc    | fm    pr    rc    fm    pr    rc    |\n"+\
+                        "---------+------------------------------------+-------------------------------------+-------------------------------------+-------------------------------------+\n"
 
         fm = algo_results[cur_set]['set_sum'].fmeasure
         pr = algo_results[cur_set]['set_sum'].precision
