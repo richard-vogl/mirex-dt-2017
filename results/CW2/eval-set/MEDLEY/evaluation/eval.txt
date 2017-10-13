@@ -1,0 +1,6 @@
+Sum Evaluation
+sum for 22 files
+  Notes:  6346 TP:  4148 FP: 2417 FN: 2198 Precision: 0.632 Recall: 0.654 F-measure: 0.643 Acc: 0.473 mean: -15.5 ms std:   8.6 ms
+Mean Evaluation
+mean for 22 files
+  Notes: 288.45 TP: 188.55 FP: 109.86 FN: 99.91 Precision: 0.621 Recall: 0.652 F-measure: 0.619 Acc: 0.478 mean: -13.6 ms std:   8.7 ms

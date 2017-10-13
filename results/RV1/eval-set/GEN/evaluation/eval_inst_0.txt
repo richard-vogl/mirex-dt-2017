@@ -1,0 +1,6 @@
+Sum Evaluation
+sum for 136 files
+  Onsets:  3232 TP:  2950 FP:   546 FN:   282 Precision: 0.844 Recall: 0.913 F-measure: 0.877 mean:  -2.0 ms std:   5.5 ms
+Mean Evaluation
+mean for 136 files
+  Onsets: 23.76 TP: 21.69 FP:  4.01 FN:  2.07 Precision: 0.894 Recall: 0.935 F-measure: 0.906 mean:  -2.9 ms std:   3.3 ms
