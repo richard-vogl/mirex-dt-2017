@@ -367,6 +367,7 @@ for algo_key in algo_dict:
 # ====
 
 tables = {}
+csvs = {}
 
 for algo_key in results_table.keys():
     algo_results = results_table[algo_key]
@@ -374,11 +375,12 @@ for algo_key in results_table.keys():
     for cur_set in algo_results.keys():
         if cur_set not in tables or len(tables[cur_set]) <= 0:
             tables[cur_set] = "Table for set '"+cur_set+"' : \n"+\
-                          "    \t | ALL inst                           | BD                                  | SD                                  | HH                                  |\n"+\
-                          "    \t | sum               mean             | sum               mean              | sum               mean              | sum               mean              |\n"+\
-                          "algo\t | fm    pr    rc    fm    pr    rc   | fm    pr    rc    fm    pr    rc    | fm    pr    rc    fm    pr    rc    | fm    pr    rc    fm    pr    rc    |\n"+\
-                        "---------+------------------------------------+-------------------------------------+-------------------------------------+-------------------------------------+\n"
+                          "    \t | ALL inst                           | BD                                  | SD                                  | HH                                 |\n"+\
+                          "    \t | sum               mean             | sum               mean              | sum               mean              | sum               mean             |\n"+\
+                          "algo\t | fm    pr    rc    fm    pr    rc   | fm    pr    rc    fm    pr    rc    | fm    pr    rc    fm    pr    rc    | fm    pr    rc    fm    pr    rc   |\n"+\
+                        "---------+------------------------------------+-------------------------------------+-------------------------------------+------------------------------------+\n"
 
+            csvs[cur_set] = "*Algorithm, mean fm, mean pr, mean rc, BD mean fm, SD mean fm, HH mean fm\n"
         fm = algo_results[cur_set]['set_sum'].fmeasure
         pr = algo_results[cur_set]['set_sum'].precision
         rc = algo_results[cur_set]['set_sum'].recall
@@ -386,7 +388,9 @@ for algo_key in results_table.keys():
         prm = algo_results[cur_set]['set_mean'].precision
         rcm = algo_results[cur_set]['set_mean'].recall
 
-        tables[cur_set] += algo_key+" \t | %1.2f  %1.2f  %1.2f  %1.2f  %1.2f  %1.2f"%(fm, pr, rc, fmm, prm, rcm)
+        tables[cur_set] += algo_key + " \t | %1.2f  %1.2f  %1.2f  %1.2f  %1.2f  %1.2f"%(fm, pr, rc, fmm, prm, rcm)
+
+        csvs[cur_set] += algo_key + ", %1.2f,  %1.2f,  %1.2f"%(fmm, prm, rcm)
 
         inst_mean = algo_results[cur_set]['inst_mean']
         inst_sum = algo_results[cur_set]['inst_mean']
@@ -399,7 +403,10 @@ for algo_key in results_table.keys():
             rcm = inst_mean[inst].recall
             tables[cur_set] += " | %1.2f  %1.2f  %1.2f  %1.2f  %1.2f  %1.2f "%(fm, pr, rc, fmm, prm, rcm)
 
-        tables[cur_set]+="| \n"
+            csvs[cur_set] += ", %1.2f"%fmm
+
+        csvs[cur_set] += "\n"
+        tables[cur_set] += "| \n"
 
 # print table to console and file
 with open(os.path.join(experiment_base_path, results_base, dataset_base+'_results_table.txt'), 'w') as f:
@@ -407,3 +414,7 @@ with open(os.path.join(experiment_base_path, results_base, dataset_base+'_result
         print(tables[table] + "\n")
         f.write(tables[table]+"\n")
 
+# print csv tables to files
+for csv in csvs:
+    with open(os.path.join(experiment_base_path, results_base, dataset_base+'_results_'+csv+'.csv'), 'w') as f:
+        f.write(csvs[csv]+"\n")
